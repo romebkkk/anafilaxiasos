@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AnafilaxiaSOS — Protocolo de Anafilaxia y Entrenador de Autoinyector</title>
+  <meta name="description" content="Guía de urgencia para reacciones alérgicas graves, criterios WAO y simulador de uso de autoinyector de adrenalina. 100% privado en tu navegador.">
+  <style>
+    :root {
+      --bg: #0F172A;
+      --card-bg: #1E293B;
+      --primary: #EF4444;
+      --warning: #F59E0B;
+      --success: #10B981;
+      --text: #F8FAFC;
+      --text-muted: #94A3B8;
+      --border: #334155;
+      --radius: 16px;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
+
+    body {
+      background-color: var(--bg);
+      color: var(--text);
+      line-height: 1.5;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 1.5rem 1rem;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 680px;
+      margin: 0 auto;
+    }
+
+    header {
+      text-align: center;
+      margin-bottom: 1.5rem;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      padding: 0.35rem 0.85rem;
+      background: rgba(239, 68, 68, 0.2);
+      color: #F87171;
+      border: 1px solid rgba(239, 68, 68, 0.4);
+      border-radius: 9999px;
+      font-size: 0.85rem;
+      font-weight: 700;
+      margin-bottom: 0.5rem;
+    }
+
+    h1 {
+      font-size: 2.1rem;
+      font-weight: 900;
+      letter-spacing: -0.02em;
+      margin-bottom: 0.35rem;
+    }
+
+    .subtitle {
+      color: var(--text-muted);
+      font-size: 1.05rem;
+    }
+
+    .card {
+      background: var(--card-bg);
+      border-radius: var(--radius);
+      border: 1px solid var(--border);
+      padding: 1.75rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .tabs {
+      display: flex;
+      gap: 0.5rem;
+      margin-bottom: 1.5rem;
+      background: rgba(15, 23, 42, 0.6);
+      padding: 0.35rem;
+      border-radius: 12px;
+    }
+    .tab-btn {
+      flex: 1;
+      padding: 0.75rem;
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      font-size: 0.95rem;
+      font-weight: 700;
+      border-radius: 9px;
+      cursor: pointer;
+    }
+    .tab-btn.active {
+      background: var(--primary);
+      color: white;
+    }
+
+    .check-label {
+      display: flex;
+      align-items: center;
+      gap: 0.65rem;
+      background: #0F172A;
+      padding: 0.85rem 1rem;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      cursor: pointer;
+      margin-bottom: 0.6rem;
+      font-size: 0.95rem;
+    }
+    .check-label input { width: 18px; height: 18px; accent-color: var(--primary); }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 100%;
+      padding: 1rem 1.5rem;
+      background: var(--primary);
+      color: white;
+      font-size: 1.15rem;
+      font-weight: 800;
+      border: none;
+      border-radius: 12px;
+      cursor: pointer;
+      text-decoration: none;
+      margin-top: 1rem;
+    }
+
+    /* Simulador Inyector */
+    .trainer-box {
+      background: #0F172A;
+      border-radius: 16px;
+      padding: 2rem 1rem;
+      text-align: center;
+      border: 2px solid var(--border);
+      margin-bottom: 1.5rem;
+    }
+    .pen-visual {
+      font-size: 4rem;
+      margin-bottom: 0.5rem;
+      transition: transform 0.2s;
+    }
+    .pen-mnemo {
+      font-size: 1.35rem;
+      font-weight: 900;
+      color: #38BDF8;
+      margin-bottom: 0.5rem;
+    }
+
+    .alert-box {
+      border-radius: 12px;
+      padding: 1.25rem;
+      margin-top: 1.25rem;
+      border-left: 5px solid;
+    }
+    .alert-danger { background: rgba(239, 68, 68, 0.2); border-color: var(--primary); color: #FCA5A5; }
+    .alert-success { background: rgba(16, 185, 129, 0.15); border-color: var(--success); color: #6EE7B7; }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <header>
+    <div class="badge">🚨 PROTOCOLO DE ALERGIA GRAVE · WAO 2020</div>
+    <h1>AnafilaxiaSOS</h1>
+    <p class="subtitle">Detección de anafilaxia aguda y entrenador de autoinyector de adrenalina</p>
+  </header>
+
+  <div class="tabs">
+    <button class="tab-btn active" id="tabCheck" onclick="cambiarTab('check')">🚨 Detector de Anafilaxia</button>
+    <button class="tab-btn" id="tabTrainer" onclick="cambiarTab('trainer')">💉 Entrenador de Inyección</button>
+    <button class="tab-btn" id="tabPassport" onclick="cambiarTab('passport')">📄 Pasaporte de Alergias</button>
+  </div>
+
+  <div class="card" id="mainContent"></div>
+</div>
+
+<script src="anafilaxia.js"></script>
+<script>
+  'use strict';
+
+  var tabActual = 'check';
+
+  function cambiarTab(tab) {
+    tabActual = tab;
+    document.getElementById('tabCheck').classList.toggle('active', tab === 'check');
+    document.getElementById('tabTrainer').classList.toggle('active', tab === 'trainer');
+    document.getElementById('tabPassport').classList.toggle('active', tab === 'passport');
+    if (tab === 'check') renderCheck();
+    else if (tab === 'trainer') renderTrainer();
+    else renderPassport();
+  }
+
+  // ------------------------------------------------------------------ Pestaña Detector
+  function renderCheck() {
+    var html = `
+      <h3 style="font-size:1.15rem; margin-bottom:0.75rem; color:#F87171;">Selecciona los síntomas observados:</h3>
+
+      <label class="check-label">
+        <input type="checkbox" id="chkPiel">
+        <span><strong>Piel / Mucosas:</strong> Urticaria generalizada, habones, picor intenso o hinchazón de labios, lengua u ojos (angioedema).</span>
+      </label>
+
+      <label class="check-label">
+        <input type="checkbox" id="chkResp">
+        <span><strong>Vías Respiratorias:</strong> Dificultad para tragar, voz ronca, pitos en el pecho (sibilancias) o sensación de ahogo.</span>
+      </label>
+
+      <label class="check-label">
+        <input type="checkbox" id="chkCardio">
+        <span><strong>Circulación / Mareo:</strong> Mareo repentino, palidez extrema, sudoración fría, sensación de desmayo o pulso muy débil.</span>
+      </label>
+
+      <label class="check-label">
+        <input type="checkbox" id="chkDigest">
+        <span><strong>Digestivo:</strong> Cólicos abdominales fuertes o vómitos repetidos tras ingerir comida sospechosa o picadura.</span>
+      </label>
+
+      <label class="check-label">
+        <input type="checkbox" id="chkAlergeno">
+        <span><strong>Exposición confirmada:</strong> Ha estado expuesto a un alérgeno conocido (frutos secos, marisco, medicamento, avispa...).</span>
+      </label>
+
+      <button class="btn" onclick="evaluarSintomas()">Evaluar Urgencia de Anafilaxia ⚡</button>
+      <div id="checkResults"></div>
+    `;
+    document.getElementById('mainContent').innerHTML = html;
+  }
+
+  function evaluarSintomas() {
+    var res = AnafilaxiaSOS.evaluarAnafilaxia({
+      cutaneos: document.getElementById('chkPiel').checked,
+      respiratorios: document.getElementById('chkResp').checked,
+      cardiovasculares: document.getElementById('chkCardio').checked,
+      digestivos: document.getElementById('chkDigest').checked,
+      alergenoExpuesto: document.getElementById('chkAlergeno').checked
+    });
+
+    var html = '';
+    if (res.esAnafilaxia) {
+      html += `
+        <div class="alert-box alert-danger">
+          <div style="font-size:1.35rem; font-weight:900; margin-bottom:0.35rem;">🚨 ¡EMERGENCIA VITAL: POSIBLE ANAFILAXIA!</div>
+          <p style="font-weight:800; font-size:1.05rem; margin-bottom:0.5rem; color:#FFFFFF;">${res.accion}</p>
+          <p style="font-size:0.95rem; line-height:1.45;">${res.mensajeClinico}</p>
+          <a href="tel:112" class="btn" style="background:#DC2626; margin-top:1rem;">📞 LLAMAR AL 112 AHORA</a>
+        </div>
+      `;
+    } else {
+      html += `
+        <div class="alert-box alert-success">
+          <h4 style="font-size:1.15rem; font-weight:800; margin-bottom:0.25rem;">✅ Reacción leve / No compatible con anafilaxia</h4>
+          <p style="font-size:0.95rem;">${res.mensajeClinico}</p>
+        </div>
+      `;
+    }
+    document.getElementById('checkResults').innerHTML = html;
+  }
+
+  // ------------------------------------------------------------------ Pestaña Entrenador
+  var trainerPaso = 1;
+  var timerCountdown = 5;
+  var countdownInterval = null;
+
+  function renderTrainer() {
+    var html = `
+      <div class="trainer-box">
+        <div class="pen-visual" id="penIcon">💉</div>
+        <div class="pen-mnemo">${AnafilaxiaSOS.REGLA_MNEMOTECNICA.lema}</div>
+        <div id="trainerStepText" style="font-size:1.1rem; font-weight:700; color:#FFFFFF; margin-bottom:1rem;">
+          Paso 1: Agarra el autoinyector con el puño cerrado.
+        </div>
+        <button class="btn" id="btnTrainerAction" onclick="avanzarTrainer()">Retirar tapa azul («Azul al cielo») 🟦</button>
+      </div>
+
+      <div style="background:#0F172A; border-radius:12px; padding:1.25rem;">
+        <h4 style="color:#38BDF8; font-size:1.05rem; margin-bottom:0.5rem;">Instrucciones oficiales (EpiPen / Jext / Altellus):</h4>
+        <ul style="margin-left:1.25rem; font-size:0.95rem; color:#CBD5E1; line-height:1.5;">
+          ${AnafilaxiaSOS.REGLA_MNEMOTECNICA.pasos.map(function(p){ return '<li>'+p+'</li>'; }).join('')}
+        </ul>
+      </div>
+    `;
+    document.getElementById('mainContent').innerHTML = html;
+    trainerPaso = 1;
+  }
+
+  function avanzarTrainer() {
+    var icon = document.getElementById('penIcon');
+    var txt = document.getElementById('trainerStepText');
+    var btn = document.getElementById('btnTrainerAction');
+
+    if (trainerPaso === 1) {
+      trainerPaso = 2;
+      txt.innerText = 'Paso 2: Tapa azul quitada. Ahora clava con fuerza el extremo naranja contra la cara lateral del muslo.';
+      btn.innerText = 'Clavar en el muslo («Naranja al muslo») 🟧';
+      btn.style.background = '#F59E0B';
+    } else if (trainerPaso === 2) {
+      trainerPaso = 3;
+      timerCountdown = 5;
+      txt.innerText = '¡CLIC! Mantén presionado firmemente contra el muslo: ' + timerCountdown + 's';
+      btn.innerText = 'Manteniendo presionado...';
+      btn.disabled = true;
+
+      countdownInterval = setInterval(function () {
+        timerCountdown--;
+        if (timerCountdown > 0) {
+          txt.innerText = '¡CLIC! Mantén presionado firmemente: ' + timerCountdown + 's';
+        } else {
+          clearInterval(countdownInterval);
+          txt.innerText = '✅ ¡Inyección completada! Retira el inyector y masajea la zona durante 10 segundos.';
+          btn.innerText = 'Reiniciar entrenamiento';
+          btn.disabled = false;
+          btn.style.background = '#10B981';
+          trainerPaso = 4;
+        }
+      }, 1000);
+    } else if (trainerPaso === 4) {
+      renderTrainer();
+    }
+  }
+
+  // ------------------------------------------------------------------ Pestaña Pasaporte
+  function renderPassport() {
+    var html = `
+      <h3 style="font-size:1.2rem; margin-bottom:0.75rem;">Generador de Pasaporte de Emergencia Alérgica</h3>
+      <p style="color:var(--text-muted); font-size:0.9rem; margin-bottom:1rem;">
+        Rellena los datos para imprimir una tarjeta de bolsillo para llevar en la cartera o en la mochila del colegio.
+      </p>
+
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:0.75rem; margin-bottom:1rem;">
+        <div>
+          <label style="font-size:0.85rem; font-weight:700;">Nombre del paciente:</label>
+          <input type="text" id="passNombre" value="Ej: Lucas Pérez" style="width:100%; padding:0.65rem; border-radius:8px; border:1px solid var(--border); background:#0F172A; color:white;">
+        </div>
+        <div>
+          <label style="font-size:0.85rem; font-weight:700;">Teléfono de urgencia:</label>
+          <input type="text" id="passTel" value="Ej: 600 000 000" style="width:100%; padding:0.65rem; border-radius:8px; border:1px solid var(--border); background:#0F172A; color:white;">
+        </div>
+      </div>
+
+      <div style="margin-bottom:1rem;">
+        <label style="font-size:0.85rem; font-weight:700;">Alérgenos confirmados:</label>
+        <input type="text" id="passAlergenos" value="Cacahuetes, Frutos secos, Penicilina" style="width:100%; padding:0.65rem; border-radius:8px; border:1px solid var(--border); background:#0F172A; color:white;">
+      </div>
+
+      <button class="btn" onclick="window.print()">🖨️ Imprimir Pasaporte de Alergia</button>
+    `;
+    document.getElementById('mainContent').innerHTML = html;
+  }
+
+  renderCheck();
+</script>
+</body>
+</html>
