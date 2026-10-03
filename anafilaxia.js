@@ -92,10 +92,33 @@
     ]
   };
 
+  /**
+   * Monitor de Segunda Dosis de Adrenalina (Protocolo WAO 2020 / ERC)
+   * Si tras 5 minutos de la primera dosis persisten síntomas graves, se debe inyectar un segundo dispositivo en el muslo contralateral.
+   */
+  function evaluarSegundaDosis(minutosTranscurridos, sintomasPersistentes) {
+    var min = parseFloat(minutosTranscurridos) || 0;
+    var persistente = !!sintomasPersistentes;
+    var tiempoCumplido = min >= 5.0;
+    var requiereSegundaDosis = tiempoCumplido && persistente;
+
+    return {
+      minutosTranscurridos: min,
+      tiempoCumplido5Min: tiempoCumplido,
+      requiereSegundaDosis: requiereSegundaDosis,
+      instruccion: requiereSegundaDosis
+        ? '⚠️ HAN PASADO 5 MINUTOS Y LOS SÍNTOMAS PERSISTEN: Inyecta de inmediato un SEGUNDO autoinyector de adrenalina en el OTRO muslo. La ambulancia 112 debe estar en camino.'
+        : (tiempoCumplido 
+            ? '✅ Han pasado 5 minutos. Si el paciente respira bien y no tiene mareo, mantén en observación acostado hasta que llegue el 112.'
+            : '⏳ Tiempo de espera activo (' + Math.round((5 - min) * 60) + 's restantes). Vigila respiración y nivel de consciencia.')
+    };
+  }
+
   return {
     VERSION: VERSION,
     evaluarAnafilaxia: evaluarAnafilaxia,
     calcularDosisAdrenalina: calcularDosisAdrenalina,
+    evaluarSegundaDosis: evaluarSegundaDosis,
     REGLA_MNEMOTECNICA: REGLA_MNEMOTECNICA
   };
 });

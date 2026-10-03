@@ -69,4 +69,28 @@ test('Adulto de 70 kg recibe dosis de 0.30 mg', function () {
   assert.strictEqual(r.tipo, 'Adulto');
 });
 
+console.log('\n=== 3. Protocolo de Segunda Dosis (WAO / ERC 5 minutos) ===');
+
+test('A los 3 minutos con síntomas todavía está en ventana de espera', function () {
+  var r = AnafilaxiaSOS.evaluarSegundaDosis(3, true);
+  assert.strictEqual(r.tiempoCumplido5Min, false);
+  assert.strictEqual(r.requiereSegundaDosis, false);
+  assert.ok(/Tiempo de espera activo/i.test(r.instruccion));
+});
+
+test('A los 5.5 minutos con síntomas persistentes exige segunda inyección en muslo contralateral', function () {
+  var r = AnafilaxiaSOS.evaluarSegundaDosis(5.5, true);
+  assert.strictEqual(r.tiempoCumplido5Min, true);
+  assert.strictEqual(r.requiereSegundaDosis, true);
+  assert.ok(/SEGUNDO autoinyector/i.test(r.instruccion));
+});
+
+test('A los 6 minutos si los síntomas cedieron no requiere segunda dosis pero sí observación 112', function () {
+  var r = AnafilaxiaSOS.evaluarSegundaDosis(6, false);
+  assert.strictEqual(r.tiempoCumplido5Min, true);
+  assert.strictEqual(r.requiereSegundaDosis, false);
+  assert.ok(/observación acostado/i.test(r.instruccion));
+});
+
 console.log('\n' + passed + ' tests de anafilaxia superados con éxito.');
+

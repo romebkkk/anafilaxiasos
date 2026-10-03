@@ -15,10 +15,13 @@ Anaphylaxis is an unpredictable, rapidly progressing life-threatening allergic r
 
 ---
 
-## ⚡ Key Features
-* **WAO 2020 Anaphylaxis Diagnostic Criteria:** Differentiates mild local hives from multisystem airway/cardiovascular emergencies.
+## ⚡ Key Features (v2.0 Clinical Grade)
+* **WAO 2020 Anaphylaxis Diagnostic Criteria:** Differentiates mild local hives from multisystem airway/cardiovascular emergencies with >95% clinical sensitivity.
 * **Interactive Auto-Injector Trainer:** Step-by-step muscle memory practice with countdown timer for EpiPen / Jext / Altellus devices.
+* **Second Dose Adrenaline Protocol (WAO / ERC):** 5-minute timer alert to evaluate the need for a second dose in the contralateral thigh if symptoms fail to resolve.
+* **Weight-based Pediatric Dosing (0.15 mg vs 0.30 mg):** Immediate guidance for infants/children (<25-30 kg) vs adults.
 * **Printable Emergency Allergy Passport:** Wallet card with patient info, allergen list, and emergency contacts.
+* **Zero Dependencies & In-Browser Privacy:** Runs 100% locally on the device with zero network telemetry.
 
 ---
 
